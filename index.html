@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0052cc">
+  <title>Hệ Thống Quản Lý Áo Đoàn - CLB TNTN Trống Đồng</title>
+
+  <!-- Favicon Logo CLB Trống Đồng -->
+  <link rel="icon" type="image/png" href="assets/logo-clb-trong-dong.png">
+
+  <!-- Google Fonts: Montserrat & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <!-- Font Awesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Stylesheet riêng của dự án -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+  <div class="app-wrapper">
+    <!-- ================= HEADER CHÍNH ================= -->
+    <header class="main-header">
+      <div class="container header-content">
+        <a href="#" class="brand-section" onclick="switchTab('dashboard'); return false;">
+          <div class="brand-logo-wrap">
+            <img src="assets/logo-clb-trong-dong.png" alt="Logo CLB TNTN Trống Đồng" class="brand-logo"
+              onerror="this.src='assets/media_1792458976201.jpg'">
+          </div>
+          <div class="brand-info">
+            <div class="brand-title">
+              CLB TNTN TRỐNG ĐỒNG
+              <span class="brand-badge"><i class="fas fa-check-circle"></i> VĂN PHÒNG ĐOÀN</span>
+            </div>
+            <div class="brand-sub">
+              <span><i class="fas fa-university"></i> Đoàn Trường Cao Đẳng Long An</span>
+              <span>&bull;</span>
+              <span><i class="fas fa-heart"></i> Tuổi trẻ &bull; Đoàn kết &bull; Cống hiến</span>
+            </div>
+          </div>
+        </a>
+
+        <div class="header-actions">
+          <div class="header-time-pill" id="realtime-clock">
+            <i class="far fa-clock"></i> Đang tải thời gian...
+          </div>
+
+          <!-- Nhóm thao tác chính: Phân quyền & Đổi Theme & Nút Menu trên Mobile -->
+          <div class="header-primary-actions">
+            <!-- Trạng thái phân quyền & Nút Đăng nhập / Đăng xuất Admin -->
+            <div id="admin-auth-header-wrap" style="display: flex; align-items: center; gap: 8px;">
+              <span class="badge-role badge-role-staff" id="header-role-badge">
+                <i class="fas fa-user"></i> <span class="role-text">NV Bán Hàng</span>
+              </span>
+              <button class="btn-header" id="btn-admin-auth-toggle" onclick="handleAdminAuthButtonClick()"
+                title="Đăng nhập tài khoản Quản trị viên (Admin)">
+                <i class="fas fa-lock"></i> <span class="btn-text">Đăng nhập Admin</span>
+              </button>
+            </div>
+
+            <button class="btn-header" id="btn-toggle-theme" title="Chuyển chế độ sáng/tối">
+              <i class="fas fa-moon"></i> <span class="btn-text">Giao diện tối</span>
+            </button>
+
+            <!-- Nút bật menu Tiện ích trên mobile -->
+            <button class="btn-header btn-mobile-menu-toggle" id="btn-mobile-menu-toggle" onclick="toggleMobileSecondaryMenu()" title="Mở danh sách tiện ích">
+              <i class="fas fa-sliders"></i> <span class="btn-text">Tiện ích</span>
+            </button>
+          </div>
+
+          <!-- Nhóm thao tác phụ (Xuất Excel, Sao lưu, Nhập file, Reset, Demo) -->
+          <div class="header-secondary-actions" id="header-secondary-actions">
+            <!-- Nút Tải toàn bộ dữ liệu thành file Excel (.xlsx) -->
+            <button class="btn-header" id="btn-export-excel-all" onclick="exportFullDataExcel()"
+              style="background: rgba(16, 185, 129, 0.35); border-color: rgba(16, 185, 129, 0.7); color: #ffffff;"
+              title="Tải toàn bộ cơ sở dữ liệu và báo cáo ra file Excel (.xlsx)">
+              <i class="fas fa-file-excel"></i> Xuất Excel
+            </button>
+
+            <button class="btn-header" id="btn-export-json" title="Tải tệp sao lưu dữ liệu JSON">
+              <i class="fas fa-download"></i> Sao lưu
+            </button>
+
+            <label class="btn-header" style="cursor: pointer;" title="Phục hồi dữ liệu từ file JSON (Cần quyền Admin)">
+              <i class="fas fa-upload"></i> Nhập file
+              <input type="file" id="input-import-json" accept=".json" style="display: none;">
+            </label>
+
+            <button class="btn-header" id="btn-reset-zero"
+              style="background: rgba(239, 68, 68, 0.35); border-color: rgba(239, 68, 68, 0.7); color: #ffffff;"
+              title="Đưa toàn bộ tồn kho, nhập, bán về 0 để nhập dữ liệu thực tế (Cần quyền Admin)">
+              <i class="fas fa-rotate-left"></i> Về 0
+            </button>
+
+            <button class="btn-header" id="btn-load-demo" title="Nạp dữ liệu mẫu thử nghiệm của CLB (Cần quyền Admin)">
+              <i class="fas fa-magic"></i> Nạp mẫu thử
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ================= THANH ĐIỀU HƯỚNG TABS ================= -->
+    <nav class="nav-tabs-bar">
+      <div class="container">
+        <div class="nav-tabs-list">
+          <button class="nav-tab-btn active" data-tab="dashboard">
+            <i class="fas fa-chart-pie"></i> Tổng Quan & Thống Kê
+          </button>
+          <button class="nav-tab-btn" data-tab="pos">
+            <i class="fas fa-cash-register"></i> Bán Hàng Tại Quầy (POS)
+            <span class="nav-tab-badge" id="pos-cart-count">0</span>
+          </button>
+          <button class="nav-tab-btn" data-tab="import">
+            <i class="fas fa-truck-loading"></i> Nhập Hàng (Mua Áo)
+          </button>
+          <button class="nav-tab-btn" data-tab="inventory">
+            <i class="fas fa-boxes"></i> Kho Hàng & Tồn Kho
+          </button>
+          <button class="nav-tab-btn" data-tab="history">
+            <i class="fas fa-history"></i> Lịch Sử Giao Dịch
+          </button>
+          <button class="nav-tab-btn" data-tab="pricing">
+            <i class="fas fa-tags"></i> Bảng Giá Niêm Yết VPĐ
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ================= NỘI DUNG CHÍNH (MAIN) ================= -->
+    <main class="container" style="padding-top: 10px; padding-bottom: 40px;">
+
+      <!-- Banner khẩu hiệu Đoàn thanh niên -->
+      <section class="hero-banner">
+        <div>
+          <div class="hero-title">
+            <i class="fas fa-tshirt"></i> QUẢN LÝ NHẬP - XUẤT - BÁN & TỒN KHO ÁO ĐOÀN THANH NIÊN
+          </div>
+          <div class="hero-subtitle">
+            <span class="hero-tag"><i class="fas fa-star"></i> Niêm yết chính thức tại Văn Phòng Đoàn</span>
+            <span class="hero-tag"><i class="fas fa-users"></i> Phục vụ Cán bộ - Đoàn viên - Sinh viên</span>
+            <span class="hero-tag"><i class="fas fa-shield-alt"></i> Áo Chuẩn Điều Lệ Đoàn TNCS Hồ Chí Minh</span>
+          </div>
+        </div>
+        <div class="hero-quick-actions">
+          <button class="btn btn-warning" onclick="switchTab('pos')">
+            <i class="fas fa-shopping-cart"></i> Bán Áo Ngay
+          </button>
+          <button class="btn btn-outline" style="color: #fff; border-color: rgba(255,255,255,0.4);"
+            onclick="openPosterModal()">
+            <i class="fas fa-image"></i> Xem Bảng Giá Gốc
+          </button>
+        </div>
+      </section>
+
+      <!-- TAB 1: TỔNG QUAN & THỐNG KÊ (DASHBOARD) -->
+      <div id="tab-dashboard" class="tab-pane active">
+        <!-- 4 Thẻ KPI chính -->
+        <div class="stats-grid">
+          <div class="stat-card card-stock">
+            <div class="stat-info">
+              <span class="stat-label">Tổng Áo Tồn Kho</span>
+              <span class="stat-value" id="kpi-total-stock">0 cái</span>
+              <span class="stat-sub" id="kpi-stock-alert">
+                <i class="fas fa-check-circle"></i> Đang tải dữ liệu...
+              </span>
+            </div>
+            <div class="stat-icon icon-stock">
+              <i class="fas fa-warehouse"></i>
+            </div>
+          </div>
+
+          <div class="stat-card card-sold">
+            <div class="stat-info">
+              <span class="stat-label">Tổng Áo Đã Bán</span>
+              <span class="stat-value" id="kpi-total-sold">0 cái</span>
+              <span class="stat-sub" style="color: #10b981;">
+                <i class="fas fa-arrow-up"></i> Xuất bán đoàn viên & sinh viên
+              </span>
+            </div>
+            <div class="stat-icon icon-sold">
+              <i class="fas fa-hand-holding-heart"></i>
+            </div>
+          </div>
+
+          <div class="stat-card card-imported">
+            <div class="stat-info">
+              <span class="stat-label">Tổng Áo Đã Nhập</span>
+              <span class="stat-value" id="kpi-total-imported">0 cái</span>
+              <span class="stat-sub" style="color: #f59e0b;">
+                <i class="fas fa-dolly-flatbed"></i> Nhập mua từ xưởng may
+              </span>
+            </div>
+            <div class="stat-icon icon-imported">
+              <i class="fas fa-boxes-stacked"></i>
+            </div>
+          </div>
+
+          <div class="stat-card card-revenue">
+            <div class="stat-info">
+              <span class="stat-label">Doanh Thu Bán Áo</span>
+              <span class="stat-value" id="kpi-total-revenue">0 đ</span>
+              <span class="stat-sub" style="color: #8b5cf6;">
+                Lợi nhuận gộp ước tính: <strong id="kpi-total-profit" style="color: #10b981; margin-left: 4px;">0
+                  đ</strong>
+              </span>
+            </div>
+            <div class="stat-icon icon-revenue">
+              <i class="fas fa-coins"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Thống kê theo 3 nhóm sản phẩm chính -->
+        <div class="panel-card">
+          <div class="panel-header">
+            <div class="panel-title">
+              <i class="fas fa-chart-column"></i> Thống Kê Theo Phân Loại Sản Phẩm
+            </div>
+            <div class="panel-actions">
+              <button class="btn btn-outline" onclick="switchTab('inventory')">
+                <i class="fas fa-external-link-alt"></i> Xem Chi Tiết Ma Trận Kho
+              </button>
+            </div>
+          </div>
+          <div id="dashboard-category-breakdown">
+            <!-- Nội dung sẽ render từ JavaScript -->
+          </div>
+        </div>
+
+        <!-- Giao dịch bán hàng gần đây -->
+        <div class="panel-card">
+          <div class="panel-header">
+            <div class="panel-title">
+              <i class="fas fa-clock-rotate-left"></i> Đơn Bán Hàng Gần Đây Tại Văn Phòng Đoàn
+            </div>
+            <div class="panel-actions">
+              <button class="btn btn-outline" onclick="switchTab('history')">
+                <i class="fas fa-list"></i> Xem Toàn Bộ Lịch Sử
+              </button>
+            </div>
+          </div>
+          <div class="table-responsive" id="dashboard-recent-transactions">
+            <!-- Render danh sách gần nhất -->
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: BÁN HÀNG TẠI QUẦY (POS) -->
+      <div id="tab-pos" class="tab-pane">
+        <div class="pos-layout">
+          <!-- Cột bên trái: Chọn sản phẩm & Size -->
+          <div class="pos-product-selection">
+            <div class="panel-card" style="margin-bottom: 0;">
+              <div style="display: flex; gap: 12px; margin-bottom: 14px; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 200px; position: relative;">
+                  <i class="fas fa-search"
+                    style="position: absolute; left: 14px; top: 12px; color: var(--text-muted);"></i>
+                  <input type="text" id="pos-search-input" class="form-control" style="padding-left: 38px;"
+                    placeholder="Tìm nhanh áo theo loại, size S-6XL...">
+                </div>
+              </div>
+
+              <!-- Filter Buttons: Danh mục áo -->
+              <div class="category-filter-chips">
+                <button class="category-chip pos-cat-filter active" data-cat="all">
+                  <i class="fas fa-layer-group"></i> Tất Cả Áo
+                </button>
+                <button class="category-chip pos-cat-filter" data-cat="so-mi-nam">
+                  <i class="fas fa-user-tie"></i> Sơ Mi Nam
+                </button>
+                <button class="category-chip pos-cat-filter" data-cat="so-mi-nu">
+                  <i class="fas fa-female"></i> Sơ Mi Nữ
+                </button>
+                <button class="category-chip pos-cat-filter" data-cat="ao-thun">
+                  <i class="fas fa-tshirt"></i> Áo Thun Đoàn
+                </button>
+              </div>
+
+              <!-- Lưới các sản phẩm (Item Cards) -->
+              <div class="products-grid" id="pos-products-container" style="margin-top: 16px;">
+                <!-- Render từ JS -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Cột bên phải: Giỏ hàng & Thanh toán -->
+          <div class="pos-cart-panel">
+            <div
+              style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+              <h3
+                style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-receipt" style="color: var(--primary);"></i> Đơn Bán Hàng
+              </h3>
+              <button class="btn btn-outline" style="padding: 4px 10px; font-size: 0.78rem; color: #ef4444;"
+                id="btn-clear-cart" title="Xóa toàn bộ giỏ hàng">
+                <i class="fas fa-trash-alt"></i> Xóa hết
+              </button>
+            </div>
+
+            <!-- Danh sách món đã chọn -->
+            <div class="cart-items-list" id="pos-cart-items">
+              <!-- Render từ JS -->
+            </div>
+
+            <!-- Tổng kết tiền -->
+            <div class="cart-summary-box">
+              <div class="summary-row">
+                <span>Tổng số lượng áo:</span>
+                <strong id="pos-total-quantity">0 cái</strong>
+              </div>
+              <div class="summary-row total">
+                <span>TỔNG CỘNG:</span>
+                <span id="pos-total-amount">0 đ</span>
+              </div>
+            </div>
+
+            <!-- Thông tin đoàn viên / người mua -->
+            <div style="margin-top: 16px; border-top: 1px solid var(--border-color); padding-top: 14px;">
+              <div class="form-group" style="margin-bottom: 10px;">
+                <label class="form-label">Tên Đoàn viên / Người mua:</label>
+                <input type="text" id="pos-customer-name" class="form-control"
+                  placeholder="Ví dụ: Nguyễn Văn A (bỏ trống = vãng lai)">
+              </div>
+
+              <div class="form-row-2col">
+                <div>
+                  <label class="form-label">Lớp / Chi đoàn:</label>
+                  <input type="text" id="pos-customer-class" class="form-control" placeholder="Ví dụ: CĐ CNTT K18">
+                </div>
+                <div>
+                  <label class="form-label">Số điện thoại:</label>
+                  <input type="tel" id="pos-customer-phone" class="form-control" placeholder="09xxxxxxxx">
+                </div>
+              </div>
+
+              <div class="form-row-2col">
+                <div>
+                  <label class="form-label">Hình thức thanh toán:</label>
+                  <select id="pos-payment-method" class="form-control">
+                    <option value="Tiền mặt">💵 Tiền mặt</option>
+                    <option value="Chuyển khoản (VietQR)">📲 Chuyển khoản (VietQR)</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="form-label">Tiền khách đưa (nếu TM):</label>
+                  <input type="number" id="pos-customer-paid" class="form-control" placeholder="Nhập số tiền...">
+                </div>
+              </div>
+
+              <!-- Tiền thừa trả lại -->
+              <div
+                style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 12px; background: var(--bg-card-alt); padding: 8px 12px; border-radius: 6px;">
+                <span>Tiền thừa trả khách:</span>
+                <strong id="pos-customer-change">0 đ</strong>
+              </div>
+
+              <!-- Khung QR Chuyển khoản (ẩn mặc định, hiện khi chọn CK) -->
+              <div id="pos-vietqr-box"
+                style="display: none; text-align: center; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; margin-bottom: 14px;">
+                <div style="font-size: 0.82rem; font-weight: 700; color: #0052cc; margin-bottom: 6px;">
+                  QUÉT MÃ VIETQR THANH TOÁN QUỸ CLB TRỐNG ĐỒNG
+                </div>
+                <img id="pos-qr-img" src="" alt="Mã VietQR"
+                  style="max-width: 170px; border-radius: 6px; box-shadow: var(--shadow-sm);">
+                <div style="font-size: 0.74rem; color: #64748b; margin-top: 4px;">Tự động điền số tiền & nội dung</div>
+              </div>
+
+              <div class="form-group" style="margin-bottom: 14px;">
+                <input type="text" id="pos-order-note" class="form-control"
+                  placeholder="Ghi chú đơn (ví dụ: mua đồng phục kết nạp...)">
+              </div>
+
+              <button class="btn btn-primary btn-block btn-lg" id="btn-checkout">
+                <i class="fas fa-check-circle"></i> THANH TOÁN & IN BIÊN LAI
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: QUẢN LÝ NHẬP HÀNG (MUA ÁO) -->
+      <div id="tab-import" class="tab-pane">
+        <!-- Banner thông báo quyền Admin -->
+        <div id="import-admin-lock-banner"></div>
+
+        <div class="import-layout">
+          <!-- Form Nhập hàng Gom 1 Phiếu Duy Nhất -->
+          <div class="panel-card">
+            <div class="panel-header">
+              <div class="panel-title">
+                <i class="fas fa-file-invoice"></i> Lập Phiếu Nhập Kho Tổng Hợp (Gom 1 Phiếu Duy Nhất)
+              </div>
+            </div>
+
+            <div
+              style="background: #e0f2fe; border-left: 4px solid #0284c7; padding: 10px 14px; border-radius: var(--radius-sm); margin-bottom: 14px; font-size: 0.82rem; color: #0369a1;">
+              <i class="fas fa-info-circle"></i> Điền số lượng từng size (S - 6XL), bấm <strong>"+ Đưa Vào Phiếu
+                Này"</strong>. Bạn có thể thêm nhiều loại áo khác nhau vào cùng <strong>1 phiếu nhập duy nhất</strong>
+              trước khi bấm Lưu!
+            </div>
+
+            <!-- Thông tin chung của phiếu nhập -->
+            <div class="form-row-2col">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Nhà Cung Cấp / Xưởng May (*):</label>
+                <input type="text" id="import-supplier" class="form-control" value="Xưởng May Cờ & Áo Đoàn Việt"
+                  placeholder="Tên xưởng may...">
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Người Nhận / Phụ Trách (*):</label>
+                <input type="text" id="import-receiver" class="form-control" value="BCH CLB Tình Nguyện Trẻ Trống Đồng">
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 14px;">
+              <label class="form-label">Ghi Chú Đợt Nhập:</label>
+              <input type="text" id="import-note" class="form-control"
+                placeholder="Ví dụ: Nhập bổ sung đầu năm học, áo chiến dịch hè...">
+            </div>
+
+            <!-- Khu vực chọn loại áo và nhập ma trận số lượng các size -->
+            <div
+              style="background: var(--bg-card-alt); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px; margin-bottom: 14px;">
+              <div class="form-row-import-select">
+                <div>
+                  <label class="form-label">Chọn Loại Áo Cần Thêm (*):</label>
+                  <select id="import-category-select" class="form-control">
+                    <option value="so-mi-nam">Áo sơ mi Đoàn - Tay dài (Nam)</option>
+                    <option value="so-mi-nu">Áo sơ mi Đoàn - Tay dài (Nữ)</option>
+                    <option value="ao-thun">Áo thun Đoàn Thanh Niên (Unisex)</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="form-label">Giá Vốn Nhập Đề Xuất (đ):</label>
+                  <input type="number" id="import-batch-cost" class="form-control" value="85000" step="1000">
+                </div>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <span class="form-label" style="margin-bottom: 0;">Nhập số lượng theo từng Size:</span>
+                <button type="button" class="btn btn-outline" style="padding: 2px 8px; font-size: 0.74rem;"
+                  id="btn-clear-matrix-inputs">Xóa số ô</button>
+              </div>
+
+              <!-- Lưới 9 kích cỡ S đến 6XL -->
+              <div class="import-matrix-grid">
+                <div class="matrix-size-cell">
+                  <span class="matrix-size-label">Size S</span>
+                  <input type="number" class="matrix-size-input input-size-qty" data-size="S" min="0" placeholder="0">
+                </div>
+                <div class="matrix-size-cell">
+                  <span class="matrix-size-label">Size M</span>
+                  <input type="number" class="matrix-size-input input-size-qty" data-size="M" min="0" placeholder="0">
+                </div>
+                <div class="matrix-size-cell">
+                  <span class="matrix-size-label">Size L</span>
+                  <input type="number" class="matrix-size-input input-size-qty" data-size="L" min="0" placeholder="0">
+                </div>
+                <div class="matrix-size-cell">
+                  <span class="matrix-size-label">Size XL</span>
+                  <input type="number" class="matrix-size-input input-size-qty" data-size="XL" min="0" placeholder="0">
+                </div>
+                <div class="matrix-size-cell">
+                  <span class="matrix-size-label">Size 2XL</span>
+                  <input type="number" class="matrix-size-input input-size-qty" data-size="2XL" min="0" placeholder="0">
+                </div>
+                <div class="matrix-size-cell">
+                  <span class="matrix-size-label">Size 3XL</span>
+                  <input type="number" class="matrix-size-input input-size-qty" data-size="3XL" min="0" placeholder="0">
+                </div>
+                <div class="matrix-size-cell">
+                  <span class="matrix-size-label">Size 4XL</span>
+                  <input type="number" class="matrix-size-input input-size-qty" data-size="4XL" min="0" placeholder="0">
+                </div>
+                <div class="matrix-size-cell">
+                  <span class="matrix-size-label">Size 5XL</span>
+                  <input type="number" class="matrix-size-input input-size-qty" data-size="5XL" min="0" placeholder="0">
+                </div>
+                <div class="matrix-size-cell">
+                  <span class="matrix-size-label">Size 6XL</span>
+                  <input type="number" class="matrix-size-input input-size-qty" data-size="6XL" min="0" placeholder="0">
+                </div>
+              </div>
+
+              <button type="button" class="btn btn-outline btn-block" id="btn-add-batch-to-draft"
+                style="color: var(--primary); border-color: var(--primary); background: #fff; font-weight: 700;">
+                <i class="fas fa-plus"></i> + Đưa Các Size Trên Vào Phiếu Này
+              </button>
+            </div>
+
+            <!-- Bảng danh sách các mặt hàng đang chờ trong phiếu này -->
+            <div class="pending-import-box">
+              <div class="pending-import-header">
+                <span><i class="fas fa-boxes-packing" style="color: var(--primary);"></i> Danh Sách Hàng Trong Phiếu
+                  Này:</span>
+                <span id="pending-items-count" style="font-size: 0.8rem; color: var(--text-muted);">Chưa có món
+                  nào</span>
+              </div>
+
+              <div class="table-responsive" style="max-height: 200px; overflow-y: auto; margin-bottom: 12px;">
+                <table class="table-custom" style="font-size: 0.82rem;">
+                  <thead>
+                    <tr>
+                      <th>Loại Áo</th>
+                      <th>Size</th>
+                      <th style="text-align: center;">SL</th>
+                      <th style="text-align: right;">Giá Vốn</th>
+                      <th style="text-align: right;">Thành Tiền</th>
+                      <th style="text-align: center;">Xóa</th>
+                    </tr>
+                  </thead>
+                  <tbody id="pending-import-table-body">
+                    <!-- Render từ JavaScript -->
+                  </tbody>
+                </table>
+              </div>
+
+              <div
+                style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 8px; margin-bottom: 14px;">
+                <span style="font-size: 0.88rem; font-weight: 700;">TỔNG CỘNG PHIẾU:</span>
+                <div>
+                  <span id="pending-total-qty"
+                    style="font-weight: 800; color: #0284c7; margin-right: 12px; font-size: 0.95rem;">0 cái</span>
+                  <span id="pending-total-amount" style="font-weight: 800; color: #f59e0b; font-size: 1.15rem;">0
+                    đ</span>
+                </div>
+              </div>
+
+              <button type="button" class="btn btn-primary btn-block btn-lg" id="btn-save-single-import-receipt">
+                <i class="fas fa-check-double"></i> HOÀN TẤT & LƯU (1 PHIẾU DUY NHẤT)
+              </button>
+            </div>
+          </div>
+
+          <!-- Lịch sử các phiếu nhập -->
+          <div class="panel-card">
+            <div class="panel-header">
+              <div class="panel-title">
+                <i class="fas fa-truck"></i> Lịch Sử Các Đợt Nhập Hàng
+              </div>
+              <div class="panel-actions">
+                <button class="btn btn-outline"
+                  style="color: #ef4444; border-color: #fca5a5; font-size: 0.8rem; padding: 6px 12px;"
+                  onclick="confirmClearImportsHistory()">
+                  <i class="fas fa-trash-alt"></i> Xóa Hết Phiếu Nhập
+                </button>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="table-custom">
+                <thead>
+                  <tr>
+                    <th>Mã Phiếu</th>
+                    <th>Thời Gian</th>
+                    <th>Nhà Cung Cấp</th>
+                    <th>Chi Tiết Áo</th>
+                    <th>Số Lượng</th>
+                    <th>Tổng Tiền</th>
+                    <th>Ghi Chú</th>
+                    <th>Thao Tác</th>
+                  </tr>
+                </thead>
+                <tbody id="import-history-table-body">
+                  <!-- Render từ JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 4: KHO HÀNG & MA TRẬN TỒN KHO CHI TIẾT -->
+      <div id="tab-inventory" class="tab-pane">
+        <div class="panel-card">
+          <div class="panel-header">
+            <div class="panel-title">
+              <i class="fas fa-boxes"></i> Bảng Ma Trận Tồn Kho Áo Đoàn Chi Tiết (Loại Áo &times; Size)
+            </div>
+            <div class="panel-actions">
+              <button class="btn btn-outline" onclick="exportInventoryExcel()"
+                style="color: #10b981; border-color: #10b981;"
+                title="Xuất toàn bộ báo cáo tồn kho ra file Excel (.xlsx)">
+                <i class="fas fa-file-excel"></i> Xuất Excel (.xlsx)
+              </button>
+              <button class="btn btn-outline" onclick="exportInventoryCSV()" title="Xuất file định dạng CSV">
+                <i class="fas fa-file-csv"></i> CSV
+              </button>
+            </div>
+          </div>
+
+          <!-- Bộ lọc kho -->
+          <div class="filter-toolbar">
+            <div class="filter-search-wrap">
+              <i class="fas fa-search filter-search-icon"></i>
+              <input type="text" id="inventory-search-input" class="form-control" style="padding-left: 38px;"
+                placeholder="Tìm theo tên áo, size, đối tượng...">
+            </div>
+
+            <div class="filter-select-wrap">
+              <select id="inventory-stock-filter" class="form-control">
+                <option value="all">Tất cả tình trạng tồn</option>
+                <option value="in_stock">✅ Còn hàng đầy đủ</option>
+                <option value="low_stock">⚠️ Sắp hết hàng (&le; 5)</option>
+                <option value="out_of_stock">❌ Đã hết hàng (0)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Bảng tồn kho -->
+          <div class="table-responsive">
+            <table class="table-custom">
+              <thead>
+                <tr>
+                  <th>Mã SKU</th>
+                  <th>Loại Áo</th>
+                  <th>Size</th>
+                  <th>Tổng Nhập</th>
+                  <th>Tổng Bán</th>
+                  <th>Tồn Hiện Tại</th>
+                  <th>Giá Bán VPĐ</th>
+                  <th>Trạng Thái</th>
+                  <th>Thao Tác</th>
+                </tr>
+              </thead>
+              <tbody id="inventory-table-body">
+                <!-- Render từ JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 5: LỊCH SỬ GIAO DỊCH -->
+      <div id="tab-history" class="tab-pane">
+        <div class="panel-card">
+          <div class="panel-header">
+            <div class="panel-title">
+              <i class="fas fa-list-check"></i> Toàn Bộ Nhật Ký Giao Dịch (Nhập Kho & Bán Hàng)
+            </div>
+            <div class="panel-actions">
+              <button class="btn btn-outline" onclick="exportSalesExcel()"
+                style="color: #10b981; border-color: #10b981; font-size: 0.82rem; padding: 6px 12px;"
+                title="Tải toàn bộ đơn bán hàng ra file Excel (.xlsx)">
+                <i class="fas fa-file-excel"></i> Xuất Excel Đơn Bán
+              </button>
+              <button class="btn btn-outline" id="btn-clear-sales-history"
+                style="color: #ef4444; border-color: #fca5a5; font-size: 0.8rem; padding: 6px 12px;"
+                onclick="confirmClearSalesHistory()" title="Cần quyền Admin để xóa sạch lịch sử">
+                <i class="fas fa-trash-alt"></i> Xóa Hết Đơn Bán
+              </button>
+              <select id="history-type-filter" class="form-control" style="width: 170px;">
+                <option value="all">Tất cả giao dịch</option>
+                <option value="sale">Chỉ đơn bán hàng</option>
+                <option value="import">Chỉ phiếu nhập kho</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table-custom">
+              <thead>
+                <tr>
+                  <th>Loại</th>
+                  <th>Mã Phiếu</th>
+                  <th>Thời Gian</th>
+                  <th>Đối Tác / Khách Hàng</th>
+                  <th>Chi Tiết Áo</th>
+                  <th>Số Lượng</th>
+                  <th>Thành Tiền</th>
+                  <th>Thao Tác</th>
+                </tr>
+              </thead>
+              <tbody id="history-table-body">
+                <!-- Render từ JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 6: BẢNG GIÁ NIÊM YẾT VĂN PHÒNG ĐOÀN -->
+      <div id="tab-pricing" class="tab-pane">
+        <div class="panel-card">
+          <div class="panel-header">
+            <div class="panel-title">
+              <i class="fas fa-newspaper"></i> Bảng Giá Bán Áo Đoàn Thanh Niên Tại Văn Phòng Đoàn
+            </div>
+            <div class="panel-actions">
+              <button class="btn btn-primary" onclick="openPosterModal()">
+                <i class="fas fa-search-plus"></i> Xem Poster Gốc Phóng To
+              </button>
+            </div>
+          </div>
+
+          <div class="pricing-showcase">
+            <!-- Cột Poster Ảnh Gốc -->
+            <div class="poster-preview-card" onclick="openPosterModal()">
+              <img src="assets/bang-gia-goc.jpg" alt="Poster Bảng Giá Áo Đoàn Tại VPĐ"
+                onerror="this.src='assets/media_1792458904502.jpg'">
+              <div class="poster-zoom-hint">
+                <i class="fas fa-magnifying-glass-plus"></i> Nhấp để phóng to poster gốc
+              </div>
+            </div>
+
+            <!-- Cột Thẻ Chi Tiết Từng Loại Áo & Nút Bán Nhanh -->
+            <div style="display: flex; flex-direction: column; gap: 16px;" id="pricing-grid-display">
+              <!-- Render từ JS -->
+            </div>
+          </div>
+
+          <!-- Ghi chú lưu ý theo poster -->
+          <div
+            style="background: #e0f2fe; border-left: 4px solid #0284c7; padding: 16px 20px; border-radius: var(--radius-md); margin-top: 24px;">
+            <h4 style="font-size: 0.95rem; font-weight: 800; color: #0369a1; margin-bottom: 8px;">
+              <i class="fas fa-bullhorn"></i> LƯU Ý KHI ĐĂNG KÝ VÀ MUA ÁO ĐOÀN TẠI VĂN PHÒNG ĐOÀN:
+            </h4>
+            <ul
+              style="font-size: 0.88rem; color: #1e293b; padding-left: 20px; display: flex; flex-direction: column; gap: 4px;">
+              <li>Giá áo được tính theo từng nhóm kích cỡ (S - 3XL: <strong>120.000đ</strong> | 4XL - 5XL:
+                <strong>125.000đ</strong> | 6XL: <strong>130.000đ</strong>).</li>
+              <li>Đoàn viên và sinh viên vui lòng kiểm tra loại áo + size trước khi đăng ký mua và nhận áo.</li>
+              <li>Liên hệ trực tiếp <strong>Văn phòng Đoàn Trường Cao Đẳng Long An / CLB TNTN Trống Đồng</strong> để
+                đăng ký và nhận áo.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ================= FOOTER ================= -->
+    <footer class="main-footer">
+      <div class="container footer-content">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <img src="assets/logo-clb-trong-dong.png" alt="Logo CLB Trống Đồng"
+            style="width: 42px; height: 42px; border-radius: 50%;" onerror="this.src='assets/media_1792458976201.jpg'">
+          <div>
+            <div style="font-weight: 800; color: var(--text-main);">CLB TÌNH NGUYỆN TRẺ TRỐNG ĐỒNG</div>
+            <div style="font-size: 0.78rem;">Đoàn TNCS Hồ Chí Minh &bull; Trường Cao Đẳng Long An</div>
+          </div>
+        </div>
+        <div>
+          Hệ thống Quản lý Bán & Tồn Kho Áo Đoàn &bull; Thiết kế chuyên dụng Văn Phòng Đoàn
+        </div>
+        <div>
+          <span class="footer-highlight">&hearts; Tự hào Thanh niên Việt Nam</span>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- ================= MODAL IN BIÊN LAI / HÓA ĐƠN ================= -->
+  <div class="modal-overlay" id="modal-receipt">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title">
+          <i class="fas fa-receipt" style="color: var(--primary);"></i> Biên Lai Bán Áo Đoàn Thanh Niên
+        </div>
+        <button class="btn-modal-close" onclick="closeReceiptModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="receipt-modal-content">
+        <!-- Render từ JavaScript -->
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-danger-sm" id="btn-delete-active-receipt" onclick="deleteActiveReceipt()">
+            <i class="fas fa-trash-alt"></i> Hủy & Xóa Đơn Này
+          </button>
+          <button class="btn-warning-sm" id="btn-edit-active-receipt" onclick="editActiveReceipt()"
+            title="Chỉnh sửa hóa đơn này (Cần Admin)">
+            <i class="fas fa-edit"></i> Sửa Hóa Đơn
+          </button>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-outline" onclick="closeReceiptModal()">Đóng</button>
+          <button class="btn btn-primary" onclick="printReceipt()">
+            <i class="fas fa-print"></i> In Biên Lai Ngay
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL XEM POSTER BẢNG GIÁ GỐC ================= -->
+  <div class="modal-overlay" id="modal-poster">
+    <div class="modal-box" style="max-width: 800px;">
+      <div class="modal-header">
+        <div class="modal-title">
+          <i class="fas fa-image" style="color: var(--primary);"></i> Poster Bảng Giá Gốc Áo Đoàn Thanh Niên - VPĐ
+        </div>
+        <button class="btn-modal-close" onclick="closePosterModal()">&times;</button>
+      </div>
+      <div class="modal-body" style="text-align: center; background: #000; padding: 10px;">
+        <img src="assets/bang-gia-goc.jpg" alt="Poster Bảng Giá Gốc"
+          style="max-width: 100%; height: auto; border-radius: 8px;"
+          onerror="this.src='assets/media_1792458904502.jpg'">
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closePosterModal()">Đóng</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL XEM CHI TIẾT & IN PHIẾU NHẬP KHO ================= -->
+  <div class="modal-overlay" id="modal-import-detail">
+    <div class="modal-box" style="max-width: 680px;">
+      <div class="modal-header">
+        <div class="modal-title">
+          <i class="fas fa-file-invoice" style="color: var(--primary);"></i> Chi Tiết Phiếu Nhập Kho Áo Đoàn
+        </div>
+        <button class="btn-modal-close" onclick="closeImportDetailModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="import-detail-modal-content">
+        <!-- Render từ JavaScript -->
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+        <button class="btn btn-danger-sm" id="btn-delete-active-import" onclick="deleteActiveImport()">
+          <i class="fas fa-trash-alt"></i> Xóa Phiếu Nhập Này
+        </button>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-outline" onclick="closeImportDetailModal()">Đóng</button>
+          <button class="btn btn-primary" onclick="printImportReceipt()">
+            <i class="fas fa-print"></i> In Phiếu Nhập
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL ĐĂNG NHẬP ADMIN ================= -->
+  <div class="modal-overlay" id="modal-admin-login">
+    <div class="modal-box" style="max-width: 440px;">
+      <div class="modal-header">
+        <div class="modal-title">
+          <i class="fas fa-user-shield" style="color: var(--primary);"></i> Đăng Nhập Quản Trị Viên (Admin)
+        </div>
+        <button class="btn-modal-close" onclick="closeAdminLoginModal()">&times;</button>
+      </div>
+      <form id="form-admin-login" onsubmit="handleAdminLoginSubmit(event)">
+        <div class="modal-body" style="padding: 24px 22px;">
+          <div
+            style="background: var(--bg-card-alt); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px 14px; margin-bottom: 18px; font-size: 0.84rem; color: var(--text-muted); display: flex; align-items: center; gap: 10px;">
+            <i class="fas fa-shield-halved" style="font-size: 1.5rem; color: #f59e0b;"></i>
+            <div>
+              Chỉ <strong>tài khoản Admin</strong> mới có quyền Chỉnh sửa / Xóa đơn, Nhập hàng và Quản lý kho.
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 14px;">
+            <label class="form-label">Tên tài khoản (User):</label>
+            <div style="position: relative;">
+              <i class="fas fa-user" style="position: absolute; left: 14px; top: 12px; color: var(--text-muted);"></i>
+              <input type="text" id="admin-login-username" class="form-control" style="padding-left: 38px;"
+                placeholder="Nhập tên tài khoản Admin..." required autocomplete="username">
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 14px;">
+            <label class="form-label">Mật khẩu (Password):</label>
+            <div style="position: relative;">
+              <i class="fas fa-key" style="position: absolute; left: 14px; top: 12px; color: var(--text-muted);"></i>
+              <input type="password" id="admin-login-password" class="form-control" style="padding-left: 38px;"
+                placeholder="Nhập mật khẩu..." required autocomplete="current-password">
+            </div>
+          </div>
+
+          <div id="admin-login-error"
+            style="display: none; color: #ef4444; font-size: 0.82rem; font-weight: 600; margin-top: 6px; padding: 6px 10px; background: #fee2e2; border-radius: 6px;">
+            <i class="fas fa-circle-exclamation"></i> Tên tài khoản hoặc mật khẩu không chính xác!
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeAdminLoginModal()">Hủy</button>
+          <button type="submit" class="btn btn-primary" style="min-width: 130px;">
+            <i class="fas fa-right-to-bracket"></i> Đăng Nhập
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL CHỈNH SỬA HÓA ĐƠN BÁN HÀNG ================= -->
+  <div class="modal-overlay" id="modal-edit-sale">
+    <div class="modal-box" style="max-width: 760px;">
+      <div class="modal-header">
+        <div class="modal-title">
+          <i class="fas fa-file-pen" style="color: #f59e0b;"></i> Chỉnh Sửa Hóa Đơn Bán Hàng <span
+            id="edit-sale-id-badge" style="color: var(--primary); font-family: monospace; margin-left: 6px;"></span>
+        </div>
+        <button class="btn-modal-close" onclick="closeEditSaleModal()">&times;</button>
+      </div>
+      <form id="form-edit-sale" onsubmit="handleSaveEditedSale(event)">
+        <div class="modal-body" style="padding: 20px;">
+          <!-- ID hóa đơn ẩn -->
+          <input type="hidden" id="edit-sale-id">
+
+          <div
+            style="background: #e0f2fe; border-left: 4px solid #0284c7; padding: 10px 14px; border-radius: var(--radius-sm); margin-bottom: 16px; font-size: 0.82rem; color: #0369a1;">
+            <i class="fas fa-info-circle"></i> Khi lưu thay đổi, hệ thống sẽ tự động đối chiếu số lượng và <strong>tự
+              động hoàn/trừ tồn kho chính xác</strong> theo số áo thực tế của hóa đơn.
+          </div>
+
+          <!-- Thông tin khách hàng & ngày giờ -->
+          <div class="edit-sale-grid">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">Tên Người Mua (*):</label>
+              <input type="text" id="edit-sale-customer-name" class="form-control" required>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">Lớp / Chi Đoàn / Đơn Vị:</label>
+              <input type="text" id="edit-sale-customer-class" class="form-control">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">Số Điện Thoại:</label>
+              <input type="tel" id="edit-sale-customer-phone" class="form-control">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">Người Bán / Đại Diện VPĐ (*):</label>
+              <input type="text" id="edit-sale-seller" class="form-control" required>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">Ngày Giờ Lập Đơn (*):</label>
+              <input type="text" id="edit-sale-date" class="form-control" required placeholder="YYYY-MM-DD HH:MM">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">Hình Thức Thanh Toán:</label>
+              <select id="edit-sale-payment-method" class="form-control">
+                <option value="Tiền mặt">Tiền mặt tại quầy</option>
+                <option value="Chuyển khoản (VietQR)">Chuyển khoản (VietQR)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label class="form-label">Ghi Chú Đơn Hàng:</label>
+            <input type="text" id="edit-sale-note" class="form-control" placeholder="Ghi chú thêm...">
+          </div>
+
+          <!-- Danh sách mặt hàng trong đơn -->
+          <div style="border-top: 1px solid var(--border-color); padding-top: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <label class="form-label" style="margin-bottom: 0; font-size: 0.95rem; font-weight: 700;">
+                <i class="fas fa-tshirt" style="color: var(--primary);"></i> Chi Tiết Mặt Hàng Trong Hóa Đơn:
+              </label>
+              <span id="edit-items-count-badge" class="badge-tag badge-unisex">0 mặt hàng</span>
+            </div>
+
+            <div class="table-responsive">
+              <table class="edit-sale-items-table">
+                <thead>
+                  <tr>
+                    <th style="width: 40px; text-align: center;">STT</th>
+                    <th>Loại Áo & Kích Cỡ</th>
+                    <th style="text-align: center; width: 140px;">Số Lượng</th>
+                    <th style="text-align: right; width: 110px;">Đơn Giá</th>
+                    <th style="text-align: right; width: 125px;">Thành Tiền</th>
+                    <th style="text-align: center; width: 50px;">Xóa</th>
+                  </tr>
+                </thead>
+                <tbody id="edit-sale-items-body">
+                  <!-- Render từ JS -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Khung thêm sản phẩm mới vào đơn này -->
+            <div class="edit-add-item-box">
+              <div style="flex: 2; min-width: 180px;">
+                <label
+                  style="font-size: 0.76rem; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Thêm
+                  loại áo:</label>
+                <select id="edit-add-category" class="form-control" style="font-size: 0.84rem; padding: 6px 10px;">
+                  <option value="so-mi-nam">Áo sơ mi Đoàn - Nam</option>
+                  <option value="so-mi-nu">Áo sơ mi Đoàn - Nữ</option>
+                  <option value="ao-thun">Áo thun Đoàn Thanh Niên</option>
+                </select>
+              </div>
+              <div style="width: 100px;">
+                <label
+                  style="font-size: 0.76rem; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Size:</label>
+                <select id="edit-add-size" class="form-control" style="font-size: 0.84rem; padding: 6px 10px;">
+                  <option value="S">S</option>
+                  <option value="M" selected>M</option>
+                  <option value="L">L</option>
+                  <option value="XL">XL</option>
+                  <option value="2XL">2XL</option>
+                  <option value="3XL">3XL</option>
+                  <option value="4XL">4XL</option>
+                  <option value="5XL">5XL</option>
+                  <option value="6XL">6XL</option>
+                </select>
+              </div>
+              <div style="width: 80px;">
+                <label
+                  style="font-size: 0.76rem; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">SL:</label>
+                <input type="number" id="edit-add-quantity" class="form-control"
+                  style="font-size: 0.84rem; padding: 6px 10px; text-align: center;" value="1" min="1">
+              </div>
+              <div>
+                <button type="button" class="btn btn-outline" onclick="handleAddProductToEditingSale()"
+                  style="font-size: 0.82rem; padding: 7px 12px; color: var(--primary); border-color: var(--primary);">
+                  <i class="fas fa-plus"></i> Thêm Vào Đơn
+                </button>
+              </div>
+            </div>
+
+            <!-- Tổng kết số tiền & số lượng sau khi sửa -->
+            <div class="edit-total-summary-card">
+              <div>
+                <span style="font-size: 0.84rem; color: var(--text-muted);">Tổng Số Áo:</span>
+                <strong id="edit-summary-total-qty" style="color: #0284c7; font-size: 1.1rem; margin-left: 6px;">0
+                  cái</strong>
+              </div>
+              <div>
+                <span style="font-size: 0.84rem; color: var(--text-muted);">Tổng Tiền Sau Sửa:</span>
+                <strong id="edit-summary-total-amount"
+                  style="color: var(--accent-red); font-size: 1.25rem; margin-left: 8px;">0 đ</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+          <button type="button" class="btn btn-outline" onclick="closeEditSaleModal()">Hủy Bỏ</button>
+          <button type="submit" class="btn btn-primary" style="min-width: 180px;">
+            <i class="fas fa-check-circle"></i> Lưu Thay Đổi & Cập Nhật Kho
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= TOAST CONTAINER ================= -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Thư viện SheetJS xuất Excel .xlsx đa trang tính -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <!-- JavaScript Scripts -->
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+
+</html>
